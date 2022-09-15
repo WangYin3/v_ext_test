@@ -14,9 +14,9 @@ obj                    :=$(addprefix $(BUILD_DIR)/,$(obj))
 
 all:check $(BUILD_DIR) $(TARGET)
 
-CFLAG                  =-Wall -Wextra -Werror -fPIC --target=$(TARGET_TRIPLE) -DUSE_RISCV_VECTOR \
-                         -march=rv64gcv1p0 -mllvm -riscv-v-vector-bits-min=512 \
-                         -menable-experimental-extensions -O2 -c
+CFLAG                  =-Wall -Wextra -Werror -fPIC --target=$(TARGET_TRIPLE) -DRV64 \
+                            -march=rv64gcv1p0 -mllvm -riscv-v-vector-bits-min=512    \
+                            -menable-experimental-extensions -O2 -c
 LFLAG                  :=-lm -O2
 
 check:
