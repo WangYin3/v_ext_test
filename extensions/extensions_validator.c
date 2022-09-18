@@ -8,7 +8,8 @@ static inline s_validate_result_t validate_I_extension() {
   uint64 val;
   s_validate_result_t result = {
       true,
-      "extension I supported",
+      "I",
+      "Extension Integer is Supported",
   };
 
   asm volatile("lui        t0, 0xff\n\t"

@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "../common/defines.h"
@@ -35,4 +36,21 @@ void append_one_result(s_validate_result_collection_t *collection,
   }
 
   collection->results[collection->count++] = result;
+}
+
+void print_result_collection(s_validate_result_collection_t *collection) {
+  if (collection == NULL) {
+    return;
+  }
+
+  printf("+-----------+----------------+--------------------------------+\n");
+  printf("| Extension | Support Status | Description                    |\n");
+  printf("+-----------+----------------+--------------------------------+\n");
+
+  for (uint32 i = 0; i < collection->count; i++) {
+    s_validate_result_t result = collection->results[i];
+    printf("| %-9s | %-14s | %-30s |\n", result.extension_name,
+           TO_BOOL_STRING(result.is_supported), result.description);
+    printf("+-----------+----------------+--------------------------------+\n");
+  }
 }

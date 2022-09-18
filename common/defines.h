@@ -5,5 +5,6 @@
 #define false 0
 
 #define EXTENSIONS_MAX_CAPACITY 512
+#define TO_BOOL_STRING(b) ((b) ? "true" : "false")
 
 #endif
