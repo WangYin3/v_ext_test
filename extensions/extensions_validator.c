@@ -98,6 +98,32 @@ static inline s_validate_result_t validate_D_extension() {
   return result;
 }
 
+static inline s_validate_result_t validate_A_extension() {
+  uint64 a = 123, b = 455, c;
+  s_validate_result_t result = {
+      true,
+      "A",
+      "Extension A is Supported",
+  };
+
+  asm volatile("addi       t0, %[src1], 0x0\n\t"
+               "addi       t1, %[src2], 0x0\n\t"
+               "lr.d       t2, (t0)\n\t"
+               "lr.d       t3, (t1)\n\t"
+               "amoadd.d   t3, t2, (t0)\n\t"
+               "amoxor.d   t4, t3, (t1)\n\t"
+               "amoand.d    t5, t3, (t0)\n\t"
+               "sc.d       t4, t3, (t1)\n\t"
+               "sc.d       t5, t4, (t0)\n\t"
+               "sd         t5, %[dest]\n\t"
+               "fence"
+               : [dest] "=m"(c)
+               : [src1] "r"(&a), [src2] "r"(&b)
+               :);
+
+  return result;
+}
+
 s_validate_result_collection_t *validate_extensions() {
   s_validate_result_collection_t *collection =
       create_result_collection(EXTENSIONS_MAX_CAPACITY);
@@ -106,6 +132,7 @@ s_validate_result_collection_t *validate_extensions() {
   append_one_result(collection, validate_M_extension());
   append_one_result(collection, validate_F_extension());
   append_one_result(collection, validate_D_extension());
+  append_one_result(collection, validate_A_extension());
 
   return collection;
 }
