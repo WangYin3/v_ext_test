@@ -9,7 +9,7 @@ static inline s_validate_result_t validate_I_extension() {
   s_validate_result_t result = {
       true,
       "I",
-      "Extension Integer is Supported",
+      "Extension I is Supported",
   };
 
   asm volatile("lui        t0, 0xff\n\t"
@@ -29,11 +29,35 @@ static inline s_validate_result_t validate_I_extension() {
   return result;
 }
 
+static inline s_validate_result_t validate_M_extension() {
+  uint64 val;
+  s_validate_result_t result = {
+      true,
+      "M",
+      "Extension M is Supported",
+  };
+
+  asm volatile("lui        t0, 0xff\n\t"
+               "lui        t1, 0x11\n\t"
+               "mul        t2, t1, t0\n\t"
+               "lui        t3, 0x2e\n\t"
+               "rem        t4, t3, t0\n\t"
+               "div        t5, t4, t1\n\t"
+               "sd         t5, %[dest]\n\t"
+               "fence"
+               : [dest] "=m"(val)
+               :
+               :);
+
+  return result;
+}
+
 s_validate_result_collection_t *validate_extensions() {
   s_validate_result_collection_t *collection =
       create_result_collection(EXTENSIONS_MAX_CAPACITY);
 
   append_one_result(collection, validate_I_extension());
+  append_one_result(collection, validate_M_extension());
 
   return collection;
 }
