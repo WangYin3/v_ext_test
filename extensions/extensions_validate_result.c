@@ -43,14 +43,14 @@ void print_result_collection(s_validate_result_collection_t *collection) {
     return;
   }
 
-  printf("+-----------+----------------+--------------------------------+\n");
-  printf("| Extension | Support Status | Description                    |\n");
-  printf("+-----------+----------------+--------------------------------+\n");
+  printf("+-----------+-----------+-------------------------------------+\n");
+  printf("| Extension | Supported | Description                         |\n");
+  printf("+-----------+-----------+-------------------------------------+\n");
 
   for (uint32 i = 0; i < collection->count; i++) {
     s_validate_result_t result = collection->results[i];
-    printf("| %-9s | %-14s | %-30s |\n", result.extension_name,
+    printf("| %-9s | %-9s | %-35s |\n", result.extension_name,
            TO_BOOL_STRING(result.is_supported), result.description);
-    printf("+-----------+----------------+--------------------------------+\n");
+    printf("+-----------+-----------+-------------------------------------+\n");
   }
 }

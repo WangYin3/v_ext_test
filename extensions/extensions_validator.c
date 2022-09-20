@@ -149,6 +149,22 @@ static inline s_validate_result_t validate_V_extension() {
   return result;
 }
 
+static inline s_validate_result_t validate_Zifencei_extension() {
+  s_validate_result_t result = {
+      true,
+      "Zifencei",
+      "Extension Zifencei is Supported",
+  };
+
+  asm volatile("fence.i\n\t"
+               "fence"
+               :
+               :
+               :);
+
+  return result;
+}
+
 s_validate_result_collection_t *validate_extensions() {
   s_validate_result_collection_t *collection =
       create_result_collection(EXTENSIONS_MAX_CAPACITY);
@@ -159,6 +175,7 @@ s_validate_result_collection_t *validate_extensions() {
   append_one_result(collection, validate_D_extension());
   append_one_result(collection, validate_A_extension());
   append_one_result(collection, validate_V_extension());
+  append_one_result(collection, validate_Zifencei_extension());
 
   return collection;
 }
