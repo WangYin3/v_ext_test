@@ -165,6 +165,25 @@ static inline s_validate_result_t validate_Zifencei_extension() {
   return result;
 }
 
+static inline s_validate_result_t validate_Zicsr_extension() {
+  uint64 csr;
+  s_validate_result_t result = {
+      true,
+      "Zicsr",
+      "Extension Zicsr is Supported",
+  };
+
+  asm volatile("csrrs t0,  fcsr, x0\n\t"
+               "csrrw t1,  fcsr, t0\n\t"
+               "sd    t1,  %[dest]\n\t"
+               "fence"
+               : [dest] "=m"(csr)
+               :
+               :);
+
+  return result;
+}
+
 s_validate_result_collection_t *validate_extensions() {
   s_validate_result_collection_t *collection =
       create_result_collection(EXTENSIONS_MAX_CAPACITY);
@@ -176,6 +195,7 @@ s_validate_result_collection_t *validate_extensions() {
   append_one_result(collection, validate_A_extension());
   append_one_result(collection, validate_V_extension());
   append_one_result(collection, validate_Zifencei_extension());
+  append_one_result(collection, validate_Zicsr_extension());
 
   return collection;
 }
