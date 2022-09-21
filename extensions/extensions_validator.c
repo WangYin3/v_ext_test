@@ -184,6 +184,54 @@ static inline s_validate_result_t validate_Zicsr_extension() {
   return result;
 }
 
+/*
+static inline s_validate_result_t validate_P_extension() {
+  uint64 a = 123, b = 455, c;
+  s_validate_result_t result = {
+      true,
+      "P",
+      "Extension P is Supported",
+  };
+
+  asm volatile("ld    t0,  %[src1]\n\t"
+               "ld    t1,  %[src2]\n\t"
+               "add16 t3,  t0, t1\n\t"
+               // "sub16 t4,  t0, t1\n\t"
+               // "sra16 t5,  t3, t4\n\t"
+               "sd    t5,  %[dest]\n\t"
+               "fence"
+               : [dest] "=m"(c)
+               : [src1] "m"(a), [src2] "m"(b)
+               :);
+
+  return result;
+}
+*/
+
+static inline s_validate_result_t validate_B_extension() {
+  uint64 val;
+  s_validate_result_t result = {
+      true,
+      "B",
+      "Extension B is Supported",
+  };
+
+  asm volatile("lui        t0, 0xff1e\n\t"
+               "lui        t1, 0x774\n\t"
+               "clz        t2, t0\n\t"
+               "clz        t3, t1\n\t"
+               "min        t4, t2, t3\n\t"
+               "max        t5, t2, t3\n\t"
+               "xnor       t6, t5, t5\n\t"
+               "sd         t6, %[dest]\n\t"
+               "fence"
+               : [dest] "=m"(val)
+               :
+               :);
+
+  return result;
+}
+
 s_validate_result_collection_t *validate_extensions() {
   s_validate_result_collection_t *collection =
       create_result_collection(EXTENSIONS_MAX_CAPACITY);
@@ -196,6 +244,8 @@ s_validate_result_collection_t *validate_extensions() {
   append_one_result(collection, validate_V_extension());
   append_one_result(collection, validate_Zifencei_extension());
   append_one_result(collection, validate_Zicsr_extension());
+  // append_one_result(collection, validate_P_extension());
+  append_one_result(collection, validate_B_extension());
 
   return collection;
 }

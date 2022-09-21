@@ -14,10 +14,11 @@ obj                    :=$(addprefix $(BUILD_DIR)/,$(obj))
 
 all:check $(BUILD_DIR) $(TARGET)
 
-CFLAG                  =-Wall -Wextra -Werror -fPIC --target=$(TARGET_TRIPLE) -DRV64 \
-                            -march=rv64gcv1p0 -mllvm -riscv-v-vector-bits-min=512    \
+CFLAG                  =-Wall -Wextra -Werror -I/usr/include --target=$(TARGET_TRIPLE) \
+                            -DRV64 -march=rv64gcv1p0_zbb -mllvm -riscv-v-vector-bits-min=512 \
                             -menable-experimental-extensions -O2 -c
-LFLAG                  :=-lm -O2
+LFLAG                  :=-O2
+LIB                    :=-lm
 
 check:
 ifndef CLANG
@@ -41,7 +42,7 @@ $(BUILD_DIR):
 
 $(TARGET):$(obj)
 	@echo "    Link     $@"
-	$(_GCC) $(LFLAG) $^ -o $@
+	$(_GCC) $(LFLAG) $^ -o $@ $(LIB)
 
 $(obj):$(BUILD_DIR)/%.o:%.c
 	@echo "    MakeDir  $(dir $@)"
