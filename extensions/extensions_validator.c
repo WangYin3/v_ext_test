@@ -112,7 +112,7 @@ static inline s_validate_result_t validate_A_extension() {
                "lr.d       t3, (t1)\n\t"
                "amoadd.d   t3, t2, (t0)\n\t"
                "amoxor.d   t4, t3, (t1)\n\t"
-               "amoand.d    t5, t3, (t0)\n\t"
+               "amoand.d   t5, t3, (t0)\n\t"
                "sc.d       t4, t3, (t1)\n\t"
                "sc.d       t5, t4, (t0)\n\t"
                "sd         t5, %[dest]\n\t"
@@ -120,6 +120,31 @@ static inline s_validate_result_t validate_A_extension() {
                : [dest] "=m"(c)
                : [src1] "r"(&a), [src2] "r"(&b)
                :);
+
+  return result;
+}
+
+static inline s_validate_result_t validate_C_extension() {
+  uint64 val;
+  s_validate_result_t result = {
+      true,
+      "C",
+      "Extension C is Supported",
+  };
+
+  asm volatile("c.lui      a0, 0xf\n\t"
+               "auipc      a1, 0x11\n\t"
+               "c.mv       a2, t0\n\t"
+               "c.andi     a3, 0xa\n\t"
+               "c.xor      a3, a1\n\t"
+               "c.add      a2, a0\n\t"
+               "c.sub      a3, a2\n\t"
+               "c.slli     a3, 0x3\n\t"
+               "c.sd       a3, %[dest]\n\t"
+               "fence"
+               : [dest] "=m"(val)
+               :
+               : "a0", "a1", "a2", "a3");
 
   return result;
 }
@@ -240,6 +265,7 @@ s_validate_result_collection_t *validate_extensions() {
   append_one_result(collection, validate_M_extension());
   append_one_result(collection, validate_F_extension());
   append_one_result(collection, validate_D_extension());
+  append_one_result(collection, validate_C_extension());
   append_one_result(collection, validate_A_extension());
   append_one_result(collection, validate_V_extension());
   append_one_result(collection, validate_Zifencei_extension());
