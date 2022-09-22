@@ -3,7 +3,7 @@
 #include "../common/defines.h"
 #include "../common/types.h"
 
-static inline uint64 inner_loop_vv_vectorization() {
+static NO_INLINE uint64 single_loop_vv_vectorization() {
   int loop_size = 4096;
   uint64 *a = malloc(sizeof(uint64) * loop_size);
   uint64 *b = malloc(sizeof(uint64) * loop_size);
@@ -26,7 +26,7 @@ static inline uint64 inner_loop_vv_vectorization() {
   return result;
 }
 
-static inline uint64 inner_loop_vi_vectorization() {
+static NO_INLINE uint64 single_loop_vi_vectorization() {
   int loop_size = 4096;
   uint64 *a = malloc(sizeof(uint64) * loop_size);
   uint64 *b = malloc(sizeof(uint64) * loop_size);
@@ -47,11 +47,34 @@ static inline uint64 inner_loop_vi_vectorization() {
   return result;
 }
 
+static NO_INLINE uint64 single_loop_vx_vectorization() {
+  int loop_size = 4096;
+  uint64 *a = malloc(sizeof(uint64) * loop_size);
+  uint64 *b = malloc(sizeof(uint64) * loop_size);
+  int x = rand() % loop_size;
+
+  FENCE();
+
+  for (int i = 0; i < loop_size; i++) {
+    b[i] = a[i] ^ (uint64)x;
+  }
+
+  FENCE();
+
+  uint64 result = b[x];
+
+  free(a);
+  free(b);
+
+  return result;
+}
+
 uint64 show_auto_vectorization() {
   uint64 result = 0;
 
-  result += inner_loop_vv_vectorization();
-  result += inner_loop_vi_vectorization();
+  result += single_loop_vv_vectorization();
+  result += single_loop_vi_vectorization();
+  result += single_loop_vx_vectorization();
 
   return result;
 }
