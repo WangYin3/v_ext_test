@@ -3,7 +3,7 @@
 #include "../common/defines.h"
 #include "../common/types.h"
 
-static inline uint64 inner_loop_nn_vectorization() {
+static inline uint64 inner_loop_vv_vectorization() {
   int loop_size = 4096;
   uint64 *a = malloc(sizeof(uint64) * loop_size);
   uint64 *b = malloc(sizeof(uint64) * loop_size);
@@ -26,10 +26,32 @@ static inline uint64 inner_loop_nn_vectorization() {
   return result;
 }
 
+static inline uint64 inner_loop_vi_vectorization() {
+  int loop_size = 4096;
+  uint64 *a = malloc(sizeof(uint64) * loop_size);
+  uint64 *b = malloc(sizeof(uint64) * loop_size);
+
+  FENCE();
+
+  for (int i = 0; i < loop_size; i++) {
+    b[i] = a[i] + 1;
+  }
+
+  FENCE();
+
+  uint64 result = b[rand() % loop_size];
+
+  free(a);
+  free(b);
+
+  return result;
+}
+
 uint64 show_auto_vectorization() {
   uint64 result = 0;
 
-  result += inner_loop_nn_vectorization();
+  result += inner_loop_vv_vectorization();
+  result += inner_loop_vi_vectorization();
 
   return result;
 }
