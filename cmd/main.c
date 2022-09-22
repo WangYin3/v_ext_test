@@ -11,6 +11,7 @@ static inline void validate_riscv_extensions() {
 
 int main() {
   validate_riscv_extensions();
+  show_auto_vectorization();
 
   return 0;
 }
