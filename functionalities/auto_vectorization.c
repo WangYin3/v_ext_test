@@ -155,6 +155,35 @@ static NO_INLINE uint64 level_2_loop_int_vectorization() {
   return result;
 }
 
+static NO_INLINE uint64 loop_with_unknown_trip_count(double *a, double *b,
+                                                     double c, int start,
+                                                     int end) {
+  FENCE();
+
+  for (int i = start; i <= end; i++) {
+    a[i] = a[i] * b[i] + c;
+  }
+
+  FENCE();
+
+  uint64 result = a[rand() % (end - start + 1) + start] > 1.0f ? 1 : 0;
+
+  return result;
+}
+
+static NO_INLINE uint64 single_loop_with_unknown_trip_count() {
+  int loop_size = 4096;
+  double *a = malloc(sizeof(double) * loop_size);
+  double *b = malloc(sizeof(double) * loop_size);
+
+  uint64 result = loop_with_unknown_trip_count(a, b, 1.23f, 1024, 4096);
+
+  free(a);
+  free(b);
+
+  return result;
+}
+
 uint64 show_auto_vectorization() {
   uint64 result = 0;
 
@@ -166,6 +195,8 @@ uint64 show_auto_vectorization() {
   result += outer_product_int_loop_vectorization();
 
   result += level_2_loop_int_vectorization();
+
+  result += single_loop_with_unknown_trip_count();
 
   return result;
 }
