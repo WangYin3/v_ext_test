@@ -184,6 +184,24 @@ static NO_INLINE uint64 single_loop_with_unknown_trip_count() {
   return result;
 }
 
+static NO_INLINE uint64 single_loop_with_induction(int loop_size) {
+  uint64 *a = malloc(sizeof(uint64) * loop_size);
+
+  FENCE();
+
+  for (int i = 0; i < loop_size; i++) {
+    a[i] = i;
+  }
+
+  FENCE();
+
+  uint64 result = a[rand() % loop_size];
+
+  free(a);
+
+  return result;
+}
+
 uint64 show_auto_vectorization() {
   uint64 result = 0;
 
@@ -191,12 +209,13 @@ uint64 show_auto_vectorization() {
   result += single_loop_int_vi_vectorization();
   result += single_loop_int_vx_vectorization();
 
+  result += single_loop_with_unknown_trip_count();
+  result += single_loop_with_induction(4096);
+
   result += inner_product_int_loop_vectorization();
   result += outer_product_int_loop_vectorization();
 
   result += level_2_loop_int_vectorization();
-
-  result += single_loop_with_unknown_trip_count();
 
   return result;
 }
