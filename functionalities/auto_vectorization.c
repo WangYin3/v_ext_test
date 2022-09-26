@@ -202,6 +202,27 @@ static NO_INLINE uint64 single_loop_with_induction(int loop_size) {
   return result;
 }
 
+static NO_INLINE uint64 single_loop_with_if_condition(int loop_size) {
+  uint64 *a = malloc(sizeof(uint64) * loop_size);
+  uint64 *b = malloc(sizeof(uint64) * loop_size);
+  uint64 result = 0;
+
+  FENCE();
+
+  for (int i = 0; i < loop_size; i++) {
+    if (a[i] > b[i]) {
+      result += a[i] + 0xa;
+    }
+  }
+
+  FENCE();
+
+  free(a);
+  free(b);
+
+  return result;
+}
+
 uint64 show_auto_vectorization() {
   uint64 result = 0;
 
@@ -211,6 +232,7 @@ uint64 show_auto_vectorization() {
 
   result += single_loop_with_unknown_trip_count();
   result += single_loop_with_induction(4096);
+  result += single_loop_with_if_condition(4096);
 
   result += inner_product_int_loop_vectorization();
   result += outer_product_int_loop_vectorization();
