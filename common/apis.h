@@ -14,6 +14,6 @@ extern void print_result_collection(s_validate_result_collection_t *collection);
 
 extern s_validate_result_collection_t *validate_extensions();
 
-extern uint64 show_auto_vectorization();
+extern void show_auto_vectorization();
 
 #endif

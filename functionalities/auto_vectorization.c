@@ -4,12 +4,9 @@
 #include "../common/defines.h"
 #include "../common/types.h"
 
-static NO_INLINE uint64 single_loop_int_vv_vectorization() {
-  int loop_size = 4096;
-  uint64 *a = malloc(sizeof(uint64) * loop_size);
-  uint64 *b = malloc(sizeof(uint64) * loop_size);
-  uint64 *c = malloc(sizeof(uint64) * loop_size);
-
+static NO_INLINE void single_loop_int_vv_vectorization(uint64 *a, uint64 *b,
+                                                       uint64 *c,
+                                                       int loop_size) {
   FENCE();
 
   for (int i = 0; i < loop_size; i++) {
@@ -17,21 +14,10 @@ static NO_INLINE uint64 single_loop_int_vv_vectorization() {
   }
 
   FENCE();
-
-  uint64 result = c[rand() % loop_size];
-
-  free(a);
-  free(b);
-  free(c);
-
-  return result;
 }
 
-static NO_INLINE uint64 single_loop_int_vi_vectorization() {
-  int loop_size = 4096;
-  uint64 *a = malloc(sizeof(uint64) * loop_size);
-  uint64 *b = malloc(sizeof(uint64) * loop_size);
-
+static NO_INLINE void single_loop_int_vi_vectorization(uint64 *a, uint64 *b,
+                                                       int loop_size) {
   FENCE();
 
   for (int i = 0; i < loop_size; i++) {
@@ -39,20 +25,11 @@ static NO_INLINE uint64 single_loop_int_vi_vectorization() {
   }
 
   FENCE();
-
-  uint64 result = b[rand() % loop_size];
-
-  free(a);
-  free(b);
-
-  return result;
 }
 
-static NO_INLINE uint64 single_loop_int_vx_vectorization() {
-  int loop_size = 4096;
+static NO_INLINE void single_loop_int_vx_vectorization(uint64 *a, uint64 *b,
+                                                       int loop_size) {
   int x = rand() % loop_size;
-  uint64 *a = malloc(sizeof(uint64) * loop_size);
-  uint64 *b = malloc(sizeof(uint64) * loop_size);
 
   FENCE();
 
@@ -61,20 +38,11 @@ static NO_INLINE uint64 single_loop_int_vx_vectorization() {
   }
 
   FENCE();
-
-  uint64 result = b[x];
-
-  free(a);
-  free(b);
-
-  return result;
 }
 
-static NO_INLINE uint64 inner_product_int_loop_vectorization() {
-  int loop_size = 1024;
+static NO_INLINE void inner_product_int_loop_vectorization(uint64 *a, uint64 *b,
+                                                           int loop_size) {
   uint64 inner_product = 0;
-  uint64 *a = malloc(sizeof(uint64) * loop_size);
-  uint64 *b = malloc(sizeof(uint64) * loop_size);
 
   FENCE();
 
@@ -84,22 +52,12 @@ static NO_INLINE uint64 inner_product_int_loop_vectorization() {
 
   FENCE();
 
-  free(a);
-  free(b);
-
-  return inner_product;
+  a[0] = inner_product;
 }
 
-static NO_INLINE uint64 outer_product_int_loop_vectorization() {
-  int loop_size = 1024;
-  uint64 *a = malloc(sizeof(uint64) * loop_size);
-  uint64 *b = malloc(sizeof(uint64) * loop_size);
-  uint64 **c = malloc(sizeof(uint64 *) * loop_size);
-
-  for (int i = 0; i < loop_size; i++) {
-    c[i] = malloc(sizeof(uint64) * loop_size);
-  }
-
+static NO_INLINE void outer_product_int_loop_vectorization(uint64 *a, uint64 *b,
+                                                           uint64 **c,
+                                                           int loop_size) {
   FENCE();
 
   for (int i = 0; i < loop_size; i++) {
@@ -109,56 +67,11 @@ static NO_INLINE uint64 outer_product_int_loop_vectorization() {
   }
 
   FENCE();
-
-  uint64 result = c[rand() % loop_size][rand() % loop_size];
-
-  free(a);
-  free(b);
-  free(c);
-
-  return result;
 }
 
-static NO_INLINE uint64 level_2_loop_int_vectorization() {
-  int loop_size = 1024;
-  uint64 *a = malloc(sizeof(uint64) * loop_size);
-  uint64 *b = malloc(sizeof(uint64) * loop_size);
-  uint64 *c = malloc(sizeof(uint64) * loop_size);
-  uint64 **d = malloc(sizeof(uint64 *) * loop_size);
-
-  for (int i = 0; i < loop_size; i++) {
-    d[i] = malloc(sizeof(uint64) * loop_size);
-  }
-
-  FENCE();
-
-  for (int i = 0; i < loop_size; i++) {
-    uint64 tmp = 0xff;
-
-    for (int k = 0; k < loop_size; k++) {
-      tmp &= a[k] * b[k];
-    }
-
-    for (int j = 0; j < loop_size; j++) {
-      d[i][j] = (a[j] | b[j]) + tmp;
-    }
-  }
-
-  FENCE();
-
-  uint64 result = d[rand() % loop_size][rand() % loop_size];
-
-  free(a);
-  free(b);
-  free(c);
-  free(d);
-
-  return result;
-}
-
-static NO_INLINE uint64 loop_with_unknown_trip_count(double *a, double *b,
-                                                     double c, int start,
-                                                     int end) {
+static NO_INLINE void single_loop_with_unknown_trip_count(double *a, double *b,
+                                                          double c, int start,
+                                                          int end) {
   FENCE();
 
   for (int i = start; i <= end; i++) {
@@ -166,28 +79,9 @@ static NO_INLINE uint64 loop_with_unknown_trip_count(double *a, double *b,
   }
 
   FENCE();
-
-  uint64 result = a[rand() % (end - start + 1) + start] > 1.0f ? 1 : 0;
-
-  return result;
 }
 
-static NO_INLINE uint64 single_loop_with_unknown_trip_count() {
-  int loop_size = 4096;
-  double *a = malloc(sizeof(double) * loop_size);
-  double *b = malloc(sizeof(double) * loop_size);
-
-  uint64 result = loop_with_unknown_trip_count(a, b, 1.23f, 1024, 4096);
-
-  free(a);
-  free(b);
-
-  return result;
-}
-
-static NO_INLINE uint64 single_loop_with_induction(int loop_size) {
-  uint64 *a = malloc(sizeof(uint64) * loop_size);
-
+static NO_INLINE void single_loop_with_induction(uint64 *a, int loop_size) {
   FENCE();
 
   for (int i = 0; i < loop_size; i++) {
@@ -195,17 +89,10 @@ static NO_INLINE uint64 single_loop_with_induction(int loop_size) {
   }
 
   FENCE();
-
-  uint64 result = a[rand() % loop_size];
-
-  free(a);
-
-  return result;
 }
 
-static NO_INLINE uint64 single_loop_with_if_condition(int loop_size) {
-  uint64 *a = malloc(sizeof(uint64) * loop_size);
-  uint64 *b = malloc(sizeof(uint64) * loop_size);
+static NO_INLINE void single_loop_with_if_condition(uint64 *a, uint64 *b,
+                                                    int loop_size) {
   uint64 result = 0;
 
   FENCE();
@@ -218,16 +105,11 @@ static NO_INLINE uint64 single_loop_with_if_condition(int loop_size) {
 
   FENCE();
 
-  free(a);
-  free(b);
-
-  return result;
+  a[0] = result;
 }
 
-static NO_INLINE uint64 single_loop_with_pointer_induction(int loop_size) {
-  double *a = malloc(sizeof(double) * loop_size);
-  double *b = malloc(sizeof(double) * loop_size);
-
+static NO_INLINE void single_loop_with_function_call(double *a, double *b,
+                                                     int loop_size) {
   FENCE();
 
   for (int i = 0; i < loop_size; i++) {
@@ -235,19 +117,10 @@ static NO_INLINE uint64 single_loop_with_pointer_induction(int loop_size) {
   }
 
   FENCE();
-
-  uint64 result = b[rand() % loop_size] > 1.0f ? 1 : 0;
-
-  free(a);
-  free(b);
-
-  return result;
 }
 
-static NO_INLINE uint64 single_loop_with_reverse_iterator(int loop_size) {
-  uint64 *a = malloc(sizeof(uint64) * loop_size);
-  uint64 *b = malloc(sizeof(uint64) * loop_size);
-
+static NO_INLINE void single_loop_with_reverse_iterator(uint64 *a, uint64 *b,
+                                                        int loop_size) {
   FENCE();
 
   for (int i = loop_size - 1; i >= 0; i--) {
@@ -255,40 +128,23 @@ static NO_INLINE uint64 single_loop_with_reverse_iterator(int loop_size) {
   }
 
   FENCE();
-
-  uint64 result = b[rand() % loop_size];
-
-  free(a);
-  free(b);
-
-  return result;
 }
 
-static NO_INLINE uint64 single_loop_with_scatter_and_gather(int loop_size) {
+static NO_INLINE void single_loop_with_scatter_and_gather(uint64 *a, uint64 *b,
+                                                          int loop_size) {
   uint64 step = 4;
-  uint64 *a = malloc(sizeof(uint64) * loop_size * step);
-  uint64 *b = malloc(sizeof(uint64) * loop_size);
 
   FENCE();
 
-  for (int i = 0; i < loop_size; i++) {
+  for (int i = 0; i < loop_size / 4; i++) {
     b[i] += a[i * step];
   }
 
   FENCE();
-
-  uint64 result = b[rand() % loop_size * step];
-
-  free(a);
-  free(b);
-
-  return result;
 }
 
-static NO_INLINE uint64 single_loop_with_mixed_types(int loop_size) {
-  char *a = malloc(sizeof(char) * loop_size);
-  uint64 *b = malloc(sizeof(uint64) * loop_size);
-
+static NO_INLINE void single_loop_with_mixed_types(char *a, uint64 *b,
+                                                   int loop_size) {
   FENCE();
 
   for (int i = 0; i < loop_size; i++) {
@@ -296,30 +152,6 @@ static NO_INLINE uint64 single_loop_with_mixed_types(int loop_size) {
   }
 
   FENCE();
-
-  uint64 result = b[rand() % loop_size];
-
-  free(a);
-  free(b);
-
-  return result;
-}
-
-static NO_INLINE uint64 single_loop_with_partial_unrolling(int loop_size) {
-  uint64 result = 0;
-  uint64 *a = malloc(sizeof(uint64) * loop_size);
-
-  FENCE();
-
-  for (int i = 0; i < loop_size; i++) {
-    result += a[i];
-  }
-
-  FENCE();
-
-  free(a);
-
-  return result;
 }
 
 static NO_INLINE void single_loop_with_slp_vectorization(int *result, int a1,
@@ -351,30 +183,68 @@ static NO_INLINE void single_loop_with_slp_vectorization(int *result, int a1,
   FENCE();
 }
 
-uint64 show_auto_vectorization() {
-  uint64 result = 0;
+static inline void show_integer_auto_vectorization() {
+  int loop_size = 4096;
 
-  result += single_loop_int_vv_vectorization();
-  result += single_loop_int_vi_vectorization();
-  result += single_loop_int_vx_vectorization();
+  uint64 *a = malloc(sizeof(uint64) * loop_size);
+  uint64 *b = malloc(sizeof(uint64) * loop_size);
+  uint64 *c = malloc(sizeof(uint64) * loop_size);
 
-  result += single_loop_with_unknown_trip_count();
-  result += single_loop_with_induction(4096);
-  result += single_loop_with_if_condition(4096);
-  result += single_loop_with_pointer_induction(4096);
-  result += single_loop_with_reverse_iterator(4096);
-  result += single_loop_with_scatter_and_gather(4096);
-  result += single_loop_with_mixed_types(4096);
-  result += single_loop_with_partial_unrolling(4096);
+  single_loop_int_vv_vectorization(a, b, c, loop_size);
+  single_loop_int_vi_vectorization(a, b, loop_size);
+  single_loop_int_vx_vectorization(a, b, loop_size);
 
-  int *slp_result = malloc(sizeof(int) * 16);
-  single_loop_with_slp_vectorization(slp_result, 1, 2, 4, 8);
-  free(slp_result);
+  single_loop_with_induction(a, loop_size);
+  single_loop_with_if_condition(a, b, loop_size);
+  single_loop_with_reverse_iterator(a, b, loop_size);
+  single_loop_with_scatter_and_gather(a, b, loop_size);
+  single_loop_with_mixed_types((char *)a, b, loop_size);
+  single_loop_with_slp_vectorization((int *)a, 1, 2, 4, 8);
 
-  result += inner_product_int_loop_vectorization();
-  result += outer_product_int_loop_vectorization();
+  free(a);
+  free(b);
+  free(c);
+}
 
-  result += level_2_loop_int_vectorization();
+static inline void show_float_point_auto_vectorization() {
+  uint64 loop_size = 4096;
+  double *a = malloc(sizeof(double) * loop_size);
+  double *b = malloc(sizeof(double) * loop_size);
+  double *c = malloc(sizeof(double) * loop_size);
 
-  return result;
+  single_loop_with_unknown_trip_count(a, b, 1.3f, loop_size / 4, loop_size / 2);
+  single_loop_with_function_call(a, b, loop_size);
+
+  free(a);
+  free(b);
+  free(c);
+}
+
+static inline void show_int_product_auto_vectorization() {
+  int loop_size = 4096;
+  uint64 *a = malloc(sizeof(uint64) * loop_size);
+  uint64 *b = malloc(sizeof(uint64) * loop_size);
+  uint64 **c = malloc(sizeof(uint64 *) * loop_size);
+
+  for (int i = 0; i < loop_size; i++) {
+    c[i] = malloc(sizeof(uint64) * loop_size);
+  }
+
+  inner_product_int_loop_vectorization(a, b, loop_size);
+  outer_product_int_loop_vectorization(a, b, c, loop_size);
+
+  free(a);
+  free(b);
+
+  for (int i = 0; i < loop_size; i++) {
+    free(c[i]);
+  }
+
+  free(c);
+}
+
+void show_auto_vectorization() {
+  show_integer_auto_vectorization();
+  show_float_point_auto_vectorization();
+  show_int_product_auto_vectorization();
 }
