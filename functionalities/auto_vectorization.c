@@ -285,6 +285,26 @@ static NO_INLINE uint64 single_loop_with_scatter_and_gather(int loop_size) {
   return result;
 }
 
+static NO_INLINE uint64 single_loop_with_mixed_types(int loop_size) {
+  char *a = malloc(sizeof(char) * loop_size);
+  uint64 *b = malloc(sizeof(uint64) * loop_size);
+
+  FENCE();
+
+  for (int i = 0; i < loop_size; i++) {
+    b[i] += a[i] & 0xf1;
+  }
+
+  FENCE();
+
+  uint64 result = b[rand() % loop_size];
+
+  free(a);
+  free(b);
+
+  return result;
+}
+
 uint64 show_auto_vectorization() {
   uint64 result = 0;
 
@@ -298,6 +318,7 @@ uint64 show_auto_vectorization() {
   result += single_loop_with_pointer_induction(4096);
   result += single_loop_with_reverse_iterator(4096);
   result += single_loop_with_scatter_and_gather(4096);
+  result += single_loop_with_mixed_types(4096);
 
   result += inner_product_int_loop_vectorization();
   result += outer_product_int_loop_vectorization();
