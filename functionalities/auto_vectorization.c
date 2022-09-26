@@ -322,6 +322,35 @@ static NO_INLINE uint64 single_loop_with_partial_unrolling(int loop_size) {
   return result;
 }
 
+static NO_INLINE void single_loop_with_slp_vectorization(int *result, int a1,
+                                                         int a2, int b1,
+                                                         int b2) {
+  int value = (a2 + b2) * (a1 + b1);
+  FENCE();
+
+  result[0] = value;
+  result[1] = value;
+  result[2] = value;
+  result[3] = value;
+
+  result[4] = value;
+  result[5] = value;
+  result[6] = value;
+  result[7] = value;
+
+  result[8] = value;
+  result[9] = value;
+  result[10] = value;
+  result[11] = value;
+
+  result[12] = value;
+  result[13] = value;
+  result[14] = value;
+  result[15] = value;
+
+  FENCE();
+}
+
 uint64 show_auto_vectorization() {
   uint64 result = 0;
 
@@ -337,6 +366,10 @@ uint64 show_auto_vectorization() {
   result += single_loop_with_scatter_and_gather(4096);
   result += single_loop_with_mixed_types(4096);
   result += single_loop_with_partial_unrolling(4096);
+
+  int *slp_result = malloc(sizeof(int) * 16);
+  single_loop_with_slp_vectorization(slp_result, 1, 2, 4, 8);
+  free(slp_result);
 
   result += inner_product_int_loop_vectorization();
   result += outer_product_int_loop_vectorization();
