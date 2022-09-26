@@ -264,6 +264,27 @@ static NO_INLINE uint64 single_loop_with_reverse_iterator(int loop_size) {
   return result;
 }
 
+static NO_INLINE uint64 single_loop_with_scatter_and_gather(int loop_size) {
+  uint64 step = 4;
+  uint64 *a = malloc(sizeof(uint64) * loop_size * step);
+  uint64 *b = malloc(sizeof(uint64) * loop_size);
+
+  FENCE();
+
+  for (int i = 0; i < loop_size; i++) {
+    b[i] += a[i * step];
+  }
+
+  FENCE();
+
+  uint64 result = b[rand() % loop_size * step];
+
+  free(a);
+  free(b);
+
+  return result;
+}
+
 uint64 show_auto_vectorization() {
   uint64 result = 0;
 
@@ -276,6 +297,7 @@ uint64 show_auto_vectorization() {
   result += single_loop_with_if_condition(4096);
   result += single_loop_with_pointer_induction(4096);
   result += single_loop_with_reverse_iterator(4096);
+  result += single_loop_with_scatter_and_gather(4096);
 
   result += inner_product_int_loop_vectorization();
   result += outer_product_int_loop_vectorization();
