@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdlib.h>
 
 #include "../common/defines.h"
@@ -223,6 +224,26 @@ static NO_INLINE uint64 single_loop_with_if_condition(int loop_size) {
   return result;
 }
 
+static NO_INLINE uint64 single_loop_with_pointer_induction(int loop_size) {
+  double *a = malloc(sizeof(double) * loop_size);
+  double *b = malloc(sizeof(double) * loop_size);
+
+  FENCE();
+
+  for (int i = 0; i < loop_size; i++) {
+    b[i] = ceil(a[i]);
+  }
+
+  FENCE();
+
+  uint64 result = b[rand() % loop_size] > 1.0f ? 1 : 0;
+
+  free(a);
+  free(b);
+
+  return result;
+}
+
 uint64 show_auto_vectorization() {
   uint64 result = 0;
 
@@ -233,6 +254,7 @@ uint64 show_auto_vectorization() {
   result += single_loop_with_unknown_trip_count();
   result += single_loop_with_induction(4096);
   result += single_loop_with_if_condition(4096);
+  result += single_loop_with_pointer_induction(4096);
 
   result += inner_product_int_loop_vectorization();
   result += outer_product_int_loop_vectorization();
