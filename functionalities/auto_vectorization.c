@@ -261,10 +261,27 @@ static inline void destory_matrix(uint64 **matrix, int r) {
   free(matrix);
 }
 
-static NO_INLINE void show_simple_gemm_auto_vectorization(uint64 **a,
-                                                          uint64 **b,
-                                                          uint64 **c, int m,
-                                                          int k, int n) {
+static NO_INLINE void show_simple_int_gemm_auto_vectorization(uint64 **a,
+                                                              uint64 **b,
+                                                              uint64 **c, int m,
+                                                              int k, int n) {
+  FENCE();
+
+  for (int i = 0; i < m; i++) {
+    for (int j = 0; j < n; j++) {
+      c[i][j] = 0;
+
+      for (int l = 0; l < k; l++) {
+        c[i][j] += a[i][l] * b[l][j];
+      }
+    }
+  }
+
+  FENCE();
+}
+
+static NO_INLINE void show_simple_float_point_gemm_auto_vectorization(
+    double **a, double **b, double **c, int m, int k, int n) {
   FENCE();
 
   for (int i = 0; i < m; i++) {
@@ -286,7 +303,9 @@ static inline void show_gemm_auto_vectorization() {
   uint64 **b = create_matrix(k, n);
   uint64 **c = create_matrix(m, n);
 
-  show_simple_gemm_auto_vectorization(a, b, c, m, k, n);
+  show_simple_int_gemm_auto_vectorization(a, b, c, m, k, n);
+  show_simple_float_point_gemm_auto_vectorization((double **)a, (double **)b,
+                                                  (double **)c, m, k, n);
 
   destory_matrix(a, m);
   destory_matrix(b, k);
