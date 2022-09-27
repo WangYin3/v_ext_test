@@ -17,7 +17,7 @@ all:check $(BUILD_DIR) $(TARGET)
 CFLAG                  =-Wall -Wextra -Werror -I/usr/include --target=$(TARGET_TRIPLE) \
                             -DRV64 -march=rv64gcv1p0_zbb -mllvm -riscv-v-vector-bits-min=512 \
                             -menable-experimental-extensions -Ofast -c
-LFLAG                  :=-O2
+LFLAG                  :=-Ofast
 LIB                    :=-lm
 
 check:

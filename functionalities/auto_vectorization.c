@@ -243,8 +243,59 @@ static inline void show_int_product_auto_vectorization() {
   free(c);
 }
 
+static inline uint64 **create_matrix(int r, int c) {
+  uint64 **matrix = malloc(sizeof(uint64 *) * r);
+
+  for (int i = 0; i < r; i++) {
+    matrix[i] = malloc(sizeof(uint64) * c);
+  }
+
+  return matrix;
+}
+
+static inline void destory_matrix(uint64 **matrix, int r) {
+  for (int i = 0; i < r; i++) {
+    free(matrix[i]);
+  }
+
+  free(matrix);
+}
+
+static NO_INLINE void show_simple_gemm_auto_vectorization(uint64 **a,
+                                                          uint64 **b,
+                                                          uint64 **c, int m,
+                                                          int k, int n) {
+  FENCE();
+
+  for (int i = 0; i < m; i++) {
+    for (int j = 0; j < n; j++) {
+      c[i][j] = 0;
+
+      for (int l = 0; l < k; l++) {
+        c[i][j] += a[i][l] * b[l][j];
+      }
+    }
+  }
+
+  FENCE();
+}
+
+static inline void show_gemm_auto_vectorization() {
+  int m = 1023, k = 512, n = 4096; // mk * kn = mn
+  uint64 **a = create_matrix(m, k);
+  uint64 **b = create_matrix(k, n);
+  uint64 **c = create_matrix(m, n);
+
+  show_simple_gemm_auto_vectorization(a, b, c, m, k, n);
+
+  destory_matrix(a, m);
+  destory_matrix(b, k);
+  destory_matrix(b, m);
+}
+
 void show_auto_vectorization() {
   show_integer_auto_vectorization();
   show_float_point_auto_vectorization();
   show_int_product_auto_vectorization();
+  show_gemm_auto_vectorization();
 }
