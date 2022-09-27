@@ -298,7 +298,7 @@ static NO_INLINE void show_simple_float_point_gemm_auto_vectorization(
 }
 
 static inline void show_gemm_auto_vectorization() {
-  int m = 1023, k = 512, n = 4096; // mk * kn = mn
+  int m = 1024, k = 512, n = 4096; // mk * kn = mn
   uint64 **a = create_matrix(m, k);
   uint64 **b = create_matrix(k, n);
   uint64 **c = create_matrix(m, n);
@@ -312,9 +312,41 @@ static inline void show_gemm_auto_vectorization() {
   destory_matrix(b, m);
 }
 
+static NO_INLINE void
+show_simple_int_convolution_auto_vectorization(uint64 **a, int am, int an,
+                                               uint64 **k, int km, int kn,
+                                               uint64 **f, int bias) {
+  for (int i = 0; i < am - km + 1; i++) {
+    for (int j = 0; j < an - kn + 1; j++) {
+      f[i][j] = bias;
+
+      for (int x = 0; x < km; x++) {
+        for (int y = 0; y < kn; y++) {
+          f[i][j] += a[i + x][j + y] * k[x][y];
+        }
+      }
+    }
+  }
+}
+
+static inline void show_convolution_auto_vectorization() {
+  int am = 1024, an = 2048, km = 8, kn = 8;
+  int fm = am - km + 1, fn = an - kn + 1;
+  uint64 **a = create_matrix(am, an);
+  uint64 **k = create_matrix(km, kn);
+  uint64 **f = create_matrix(fm, fn);
+
+  show_simple_int_convolution_auto_vectorization(a, am, an, k, km, kn, f, 1);
+
+  destory_matrix(a, am);
+  destory_matrix(k, km);
+  destory_matrix(k, fm);
+}
+
 void show_auto_vectorization() {
   show_integer_auto_vectorization();
   show_float_point_auto_vectorization();
   show_int_product_auto_vectorization();
   show_gemm_auto_vectorization();
+  show_convolution_auto_vectorization();
 }
