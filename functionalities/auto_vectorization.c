@@ -364,7 +364,7 @@ show_simple_int_convolution_auto_vectorization(uint64 **a, int am, int an,
 }
 
 static inline void show_convolution_auto_vectorization() {
-  int am = 1024, an = 2048, km = 8, kn = 8;
+  int am = 1024, an = 2048, km = 64, kn = 64;
   int fm = am - km + 1, fn = an - kn + 1;
   uint64 **a = create_matrix(am, an);
   uint64 **k = create_matrix(km, kn);
