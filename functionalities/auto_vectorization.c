@@ -343,7 +343,7 @@ static inline void show_gemm_auto_vectorization() {
 
   destory_matrix(a, m);
   destory_matrix(b, k);
-  destory_matrix(b, m);
+  destory_matrix(c, m);
 }
 
 static NO_INLINE void
@@ -374,7 +374,7 @@ static inline void show_convolution_auto_vectorization() {
 
   destory_matrix(a, am);
   destory_matrix(k, km);
-  destory_matrix(k, fm);
+  destory_matrix(f, fm);
 }
 
 void show_auto_vectorization() {
