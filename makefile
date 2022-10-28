@@ -14,7 +14,7 @@ obj                    :=$(addprefix $(BUILD_DIR)/,$(obj))
 
 all:check $(BUILD_DIR) $(TARGET)
 
-CFLAG                  =-Wall -Wextra -I/usr/include --target=$(TARGET_TRIPLE) \
+CFLAG                  =-Wall -Wextra -I/usr/include -I/usr/riscv64-linux-gnu/include --target=$(TARGET_TRIPLE) \
                             -DRV64 -march=rv64gcv1p0_zbb -mllvm -riscv-v-vector-bits-min=512 \
                             -menable-experimental-extensions -Ofast -c
 LFLAG                  :=-Ofast -static
