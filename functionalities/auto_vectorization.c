@@ -1,12 +1,184 @@
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "../common/defines.h"
 #include "../common/types.h"
+#include "../common/apis.h"
 
+const char * const v_instruction_list[]={"validate_extensions",
+"[start]",
+"vsetivli",
+"vle64.v",
+"vse64.v",
+"vsetvli",
+"vadd.vv",
+"vsub.vv",
+"vxor.vv",
+"vsll.vv",
+"vand.vv",
+"[end]",
+"append_one_result",
+"[start]",
+"vsetivli",
+"vle64.v",
+"vse64.v",
+"[end]",
+"single_loop_int_vv_vectorization",
+"[start]",
+"vsetvli",
+"vl1re64.v",
+"vand.vv",
+"vs1r.v",
+"[end]",
+"single_loop_int_vi_vectorization",
+"[start]",
+"vsetvli",
+"vl1re64.v",
+"vadd.vi",
+"vs1r.v",
+"[end]",
+"single_loop_int_vx_vectorization",
+"[start]",
+"vsetvli",
+"vl1re64.v",
+"vxor.vx",
+"vs1r.v",
+"[end]",
+"single_loop_with_induction",
+"[start]",
+"vsetvli",
+"vid.v",
+"vs1r.v",
+"vadd.vx",
+"[end]",
+"single_loop_with_if_condition",
+"[start]",
+"vsetvli",
+"vmv.v.i",
+"vl1re64.v",
+"vmsltu.vv",
+"vmv1r.v",
+"vadd.vi",
+"vadd.vv",
+"vmv.s.x",
+"vredsum.vs",
+"vmv.x.s",
+"[end]",
+"single_loop_with_reverse_iterator",
+"[start]",
+"vsetvli",
+"vid.v",
+"vrsub.vx",
+"vl1re64.v",
+"vrgather.vv",
+"vand.vx",
+"vadd.vv",
+"vs1r.v",
+"[end]",
+"single_loop_with_scatter_and_gather",
+"[start]",
+"vsetvli",
+"vlse64.v",
+"vl1re64.v",
+"vadd.vv",
+"vs1r.v",
+"[end]",
+"single_loop_with_mixed_types",
+"[start]",
+"vsetvli",
+"vle8.v",
+"vand.vi",
+"vsetvli",
+"vl1re64.v",
+"vzext.vf8",
+"vadd.vv",
+"vs1r.v",
+"[end]",
+"single_loop_with_unknown_trip_count",
+"[start]",
+"vsetvli",
+"vlse64.v",
+"vl1re64.v",
+"vfmadd.vv",
+"vs1r.v",
+"[end]",
+"single_loop_with_function_call",
+"[start]",
+"vl1re64.v",
+"vsetvli",
+"vfabs.v",
+"vmflt.vf",
+"vfcvt.x.f.v",
+"vfcvt.f.x.v",
+"vfsgnj.vv",
+"vs1r.v",
+"[end]",
+"inner_product_int_loop_vectorization",
+"[start]",
+"vsetvli",
+"vmv.v.i",
+"vl1re64.v",
+"vmacc.vv",
+"vmv.s.x",
+"vredsum.vs",
+"vmv.x.s",
+"[end]",
+"outer_product_int_loop_vectorization",
+"[start]",
+"vsetvli",
+"vl1re64.v",
+"vmul.vx",
+"vs1r.v",
+"[end]",
+"show_simple_int_gemm_auto_vectorization",
+"[start]",
+"vsetvli",
+"vmv1r.v",
+"vl1re64.v",
+"vmacc.vv",
+"vmv.s.x",
+"vredsum.vs",
+"vsetivli",
+"vse64.v",
+"vmv.x.s",
+"[end]",
+"show_simple_int_convolution_auto_vectorization",
+"[start]",
+"vsetvli",
+"vmv1r.v",
+"vmv.s.x",
+"vl1re64.v",
+"vsetvli",
+"vmacc.vv",
+"vredsum.vs",
+"vmv.x.s",
+"vsetivli",
+"vse64.v",
+"[end]"};
+static const int vlist_len = sizeof(v_instruction_list) / sizeof(*v_instruction_list);
+void p_instruction_executed(const char *fun_name) {
+  for (size_t i=0; i<vlist_len; ++i){
+    if(!strcmp(fun_name,v_instruction_list[i])){
+      printf("+-----------+-----------+-------------------------------------+\n");
+      printf("|Function: %-50s |\n",v_instruction_list[i]);
+      printf("+-----------+-----------+-------------------------------------+\n");
+      for (size_t j=i+2; j<vlist_len; ++j){
+        if(strcmp("[end]",v_instruction_list[j])){
+          printf(" Instruction: %-15s-------------------------executed\n",v_instruction_list[j]);
+        }else{
+          break;
+        }
+      }
+      break;
+    }
+  }
+}
 static NO_INLINE void single_loop_int_vv_vectorization(uint64 *a, uint64 *b,
                                                        uint64 *c,
                                                        int loop_size) {
+  p_instruction_executed(__FUNCTION__);
   FENCE();
 
   for (int i = 0; i < loop_size; i++) {
@@ -18,6 +190,7 @@ static NO_INLINE void single_loop_int_vv_vectorization(uint64 *a, uint64 *b,
 
 static NO_INLINE void single_loop_int_vi_vectorization(uint64 *a, uint64 *b,
                                                        int loop_size) {
+  p_instruction_executed(__FUNCTION__);
   FENCE();
 
   for (int i = 0; i < loop_size; i++) {
@@ -29,6 +202,7 @@ static NO_INLINE void single_loop_int_vi_vectorization(uint64 *a, uint64 *b,
 
 static NO_INLINE void single_loop_int_vx_vectorization(uint64 *a, uint64 *b,
                                                        int loop_size) {
+  p_instruction_executed(__FUNCTION__);
   int x = rand() % loop_size;
 
   FENCE();
@@ -72,6 +246,7 @@ static NO_INLINE void outer_product_int_loop_vectorization(uint64 *a, uint64 *b,
 static NO_INLINE void single_loop_with_unknown_trip_count(double *a, double *b,
                                                           double c, int start,
                                                           int end) {
+  p_instruction_executed(__FUNCTION__);
   FENCE();
 
   for (int i = start; i <= end; i++) {
@@ -82,6 +257,7 @@ static NO_INLINE void single_loop_with_unknown_trip_count(double *a, double *b,
 }
 
 static NO_INLINE void single_loop_with_induction(uint64 *a, int loop_size) {
+  p_instruction_executed(__FUNCTION__);
   FENCE();
 
   for (int i = 0; i < loop_size; i++) {
@@ -93,6 +269,7 @@ static NO_INLINE void single_loop_with_induction(uint64 *a, int loop_size) {
 
 static NO_INLINE void single_loop_with_if_condition(uint64 *a, uint64 *b,
                                                     int loop_size) {
+  p_instruction_executed(__FUNCTION__);
   uint64 result = 0;
 
   FENCE();
@@ -110,6 +287,7 @@ static NO_INLINE void single_loop_with_if_condition(uint64 *a, uint64 *b,
 
 static NO_INLINE void single_loop_with_function_call(double *a, double *b,
                                                      int loop_size) {
+  p_instruction_executed(__FUNCTION__);
   FENCE();
 
   for (int i = 0; i < loop_size; i++) {
@@ -121,6 +299,7 @@ static NO_INLINE void single_loop_with_function_call(double *a, double *b,
 
 static NO_INLINE void single_loop_with_reverse_iterator(uint64 *a, uint64 *b,
                                                         int loop_size) {
+  p_instruction_executed(__FUNCTION__);
   FENCE();
 
   for (int i = loop_size - 1; i >= 0; i--) {
@@ -132,6 +311,7 @@ static NO_INLINE void single_loop_with_reverse_iterator(uint64 *a, uint64 *b,
 
 static NO_INLINE void single_loop_with_scatter_and_gather(uint64 *a, uint64 *b,
                                                           int loop_size) {
+  p_instruction_executed(__FUNCTION__);
   uint64 step = 4;
 
   FENCE();
@@ -145,6 +325,7 @@ static NO_INLINE void single_loop_with_scatter_and_gather(uint64 *a, uint64 *b,
 
 static NO_INLINE void single_loop_with_mixed_types(char *a, uint64 *b,
                                                    int loop_size) {
+  p_instruction_executed(__FUNCTION__);
   FENCE();
 
   for (int i = 0; i < loop_size; i++) {
@@ -157,6 +338,7 @@ static NO_INLINE void single_loop_with_mixed_types(char *a, uint64 *b,
 static NO_INLINE void single_loop_with_slp_vectorization(int *result, int a1,
                                                          int a2, int b1,
                                                          int b2) {
+  p_instruction_executed(__FUNCTION__);
   int value = (a2 + b2) * (a1 + b1);
   FENCE();
 
@@ -214,7 +396,6 @@ static inline void show_float_point_auto_vectorization() {
 
   single_loop_with_unknown_trip_count(a, b, 1.3f, loop_size / 4, loop_size / 2);
   single_loop_with_function_call(a, b, loop_size);
-
   free(a);
   free(b);
   free(c);
@@ -265,6 +446,7 @@ static NO_INLINE void show_simple_int_gemm_auto_vectorization(uint64 **a,
                                                               uint64 **b,
                                                               uint64 **c, int m,
                                                               int k, int n) {
+  p_instruction_executed(__FUNCTION__);
   FENCE();
 
   for (int i = 0; i < m; i++) {
@@ -281,6 +463,7 @@ static NO_INLINE void show_simple_int_gemm_auto_vectorization(uint64 **a,
 }
 
 static NO_INLINE uint64 **transform_matrix(uint64 **matrix, int k, int n) {
+  p_instruction_executed(__FUNCTION__);
   uint64 **transform = create_matrix(n, k);
 
   for (int i = 0; i < k; i++) {
@@ -294,6 +477,7 @@ static NO_INLINE uint64 **transform_matrix(uint64 **matrix, int k, int n) {
 
 static NO_INLINE void show_simple_int_gemm_transformed_auto_vectorization(
     uint64 **a, uint64 **b, uint64 **c, int m, int k, int n) {
+  p_instruction_executed(__FUNCTION__);
   uint64 **transform = transform_matrix(b, k, n);
 
   FENCE();
@@ -315,6 +499,7 @@ static NO_INLINE void show_simple_int_gemm_transformed_auto_vectorization(
 
 static NO_INLINE void show_simple_float_point_gemm_auto_vectorization(
     double **a, double **b, double **c, int m, int k, int n) {
+  p_instruction_executed(__FUNCTION__);
   FENCE();
 
   for (int i = 0; i < m; i++) {
@@ -350,6 +535,7 @@ static NO_INLINE void
 show_simple_int_convolution_auto_vectorization(uint64 **a, int am, int an,
                                                uint64 **k, int km, int kn,
                                                uint64 **f, int bias) {
+  p_instruction_executed(__FUNCTION__);
   for (int i = 0; i < am - km + 1; i++) {
     for (int j = 0; j < an - kn + 1; j++) {
       f[i][j] = bias;

@@ -1,6 +1,7 @@
 #include "../common/apis.h"
 #include "../common/types.h"
-
+#include <stdio.h>
+#include <stdlib.h>
 static inline void validate_riscv_extensions() {
   s_validate_result_collection_t *collection = validate_extensions();
 

@@ -261,17 +261,17 @@ s_validate_result_collection_t *validate_extensions() {
   s_validate_result_collection_t *collection =
       create_result_collection(EXTENSIONS_MAX_CAPACITY);
 
-  append_one_result(collection, validate_I_extension());
-  append_one_result(collection, validate_M_extension());
-  append_one_result(collection, validate_F_extension());
-  append_one_result(collection, validate_D_extension());
-  append_one_result(collection, validate_C_extension());
-  append_one_result(collection, validate_A_extension());
+  // append_one_result(collection, validate_I_extension());
+  // append_one_result(collection, validate_M_extension());
+  // append_one_result(collection, validate_F_extension());
+  // append_one_result(collection, validate_D_extension());
+  // append_one_result(collection, validate_C_extension());
+  // append_one_result(collection, validate_A_extension());
   append_one_result(collection, validate_V_extension());
-  append_one_result(collection, validate_Zifencei_extension());
-  append_one_result(collection, validate_Zicsr_extension());
+  // append_one_result(collection, validate_Zifencei_extension());
+  // append_one_result(collection, validate_Zicsr_extension());
   // append_one_result(collection, validate_P_extension());
-  append_one_result(collection, validate_B_extension());
+  // append_one_result(collection, validate_B_extension());
 
   return collection;
 }
